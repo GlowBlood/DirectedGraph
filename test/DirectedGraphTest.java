@@ -92,4 +92,26 @@ public class DirectedGraphTest {
         assert (out.contains(arrow1) && inn.contains(arrow1) && !out.contains(arrow2) && !inn.contains(arrow2) && out.contains(arrow3) && inn.contains(arrow3));
     }
 
+    @Test
+    public void testEquals() {
+        DirectedGraph graph = new DirectedGraph();
+        graph.addNode("Node1");
+        graph.addNode("Node2");
+        DirectedGraph.Arrow arrow1 = new DirectedGraph.Arrow(10);
+        DirectedGraph.Arrow arrow2 = new DirectedGraph.Arrow(15);
+        DirectedGraph.Arrow arrow3 = new DirectedGraph.Arrow(20);
+        graph.addArrow(arrow1, "Node1", "Node2");
+        graph.addArrow(arrow2, "Node1", "Node2");
+        graph.addArrow(arrow3, "Node1", "Node2");
+
+        DirectedGraph graph2 = new DirectedGraph();
+        graph2.addNode("Node1");
+        graph2.addNode("Node2");
+        graph2.addArrow(arrow1, "Node1", "Node2");
+        graph2.addArrow(arrow2, "Node1", "Node2");
+        graph2.addArrow(arrow3, "Node1", "Node2");
+
+        assert (graph.equals(graph2));
+    }
+
 }

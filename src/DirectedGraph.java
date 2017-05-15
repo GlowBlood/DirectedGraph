@@ -27,25 +27,13 @@ public class DirectedGraph {
         public String toString() {
             return "Вес дуги " + this.weight;
         }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + weight;
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return (this == obj); //дуги равны только если они указывают на одну дугу
-        }
     }
 
 
     private final Map<String, Node> nodeMap = new HashMap<>();
 
     public void addNode(String name) {
+        if (name == null) throw new IllegalArgumentException("Передан null");
         if (nodeMap.containsKey(name)) throw new IllegalArgumentException("Узел " + name + " уже существует");
         Node node = new Node();
         nodeMap.put(name, node);
@@ -108,39 +96,40 @@ public class DirectedGraph {
     public ArrayList<Arrow> getListInn(String name) {
         final ArrayList<Arrow> in = incomingArrows.get(nodeMap.get(name));
         if (in == null) throw new NoSuchElementException("Узла " + name + " не существует");
-        return in;
+        return new ArrayList<>(in);
     }
 
     public ArrayList<Arrow> getListOut(String name) {
         final ArrayList<Arrow> out = outgoingArrows.get(nodeMap.get(name));
         if (out == null) throw new NoSuchElementException("Узла " + name + " не существует");
-        return out;
+        return new ArrayList<>(out);
     }
 
-    private ArrayList listOfNode(String key) {
-        ArrayList result = new ArrayList<>();
-        result.add("имя узла " + key);
-        Node i = nodeMap.get(key);
-        result.add("Список исходящих дуг");
-        result.add(getListOut(key));
-        result.add("Список входящих дуг");
-        result.add(getListInn(key));
-        return result;
+    private String listOfNode(String key) {
+        StringBuilder result = new StringBuilder();
+        result.append("имя узла " + key);
+        result.append("Список исходящих дуг");
+        result.append(getListOut(key));
+        result.append("Список входящих дуг");
+        result.append(getListInn(key));
+        return result.toString();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + incomingArrows.hashCode() + outgoingArrows.hashCode() + nodeMap.hashCode();
+        result = prime * result + incomingArrows.hashCode();
+        result = prime * result + outgoingArrows.hashCode();
+        result = prime * result + nodeMap.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
-        ArrayList newResult = new ArrayList<>();
+        StringBuilder newResult = new StringBuilder();
         for (String key : nodeMap.keySet()) {
-            newResult.add(listOfNode(key));
+            newResult.append(listOfNode(key));
         }
         return newResult.toString();
     }
@@ -154,12 +143,27 @@ public class DirectedGraph {
         if (getClass() != obj.getClass())
             return false;
         DirectedGraph other = (DirectedGraph) obj;
-        return (nodeMap.equals(other.nodeMap) && incomingArrows.equals(other.incomingArrows) && outgoingArrows.equals(other.outgoingArrows));
+        if (!nodeMap.keySet().equals(other.nodeMap.keySet())) {
+            return false;
+        }
+        for (String key : nodeMap.keySet()) {
+            if (!(compareArrayLists(getListInn(key), other.getListInn(key)) && compareArrayLists(getListOut(key), other.getListOut(key)))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public String[] getNodeNames() {
         return nodeMap.keySet().toArray(new String[0]);
     }
 
-
+    private static boolean compareArrayLists(ArrayList<Arrow> a1, ArrayList<Arrow> a2) {
+        if (a1 == null || a2 == null) {
+            return false;
+        }
+        a1.sort((o1, o2) -> o1.hashCode() > o2.hashCode() ? 1 : -1);
+        a2.sort((o1, o2) -> o1.hashCode() > o2.hashCode() ? 1 : -1);
+        return a1.equals(a2);
+    }
 }
